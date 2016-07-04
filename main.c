@@ -6,6 +6,8 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 
+#include "i3keys.h"
+
 Display *display;
 Window window;
 int screen;
@@ -27,10 +29,53 @@ static XColor color_from_hex(const char *code) {
   return color;
 }
 
+static void calculate_layout_dimensions() {
+  int x = 0;
+  int y = 0;
+  int last_row = 0;
+
+  i3KeysVisualKey *visualKey = visualLayout;
+  i3KeysVisualKey *visualKeyEnd = visualLayout + sizeof(visualLayout)/sizeof(visualLayout[0]);
+  while(visualKey < visualKeyEnd) {
+    printf("Calculating key dimensions with id %d\n", visualKey->id);
+
+    if(last_row != visualKey->row) {
+      x = 0;
+    }
+    last_row = visualKey->row;
+    x += MARGIN;
+
+    y = MARGIN + visualKey->row * (MARGIN + KEYSIZE);
+    
+    visualKey->x = x;
+    visualKey->y = y;
+    visualKey->width = visualKey->span * KEYSIZE + (visualKey->span-1) * MARGIN;
+    visualKey->height = KEYSIZE;
+
+    x += visualKey->width;
+    
+    visualKey++;
+  }
+}
+
+static void render_keys() {
+  // Set foreground color for keys
+  XSetForeground(display, DefaultGC(display, screen), color_unfocused.pixel);
+
+  // Draw key backgrounds
+  i3KeysVisualKey *visualKey = visualLayout;
+  i3KeysVisualKey *visualKeyEnd = visualLayout + sizeof(visualLayout)/sizeof(visualLayout[0]);
+  while(visualKey < visualKeyEnd) {
+    printf("Key with id %d\n", visualKey->id);
+    XFillRectangle(display, window, DefaultGC(display, screen), visualKey->x, visualKey->y, visualKey->width, visualKey->height);
+    visualKey++;
+  }
+}
+
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
-  XSetForeground(display, DefaultGC(display, screen), color_unfocused.pixel);
-  XFillRectangle(display, window, DefaultGC(display, screen), 20, 20, 100, 100);
+  calculate_layout_dimensions();
+  render_keys();
 }
 
 // Send a key event where the type is KeyPress or KeyRelease, keycodes are defined in X11/keysym, e.g. XK_g
