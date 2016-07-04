@@ -8,6 +8,17 @@
 Display *display;
 Window window;
 int screen;
+Colormap colormap;
+XColor color_background;
+
+// Create an XColor from a hex code such as #1B1D1E
+static XColor color_from_hex(const char *code) {
+  XColor color;
+  XParseColor(display, colormap, code, &color);
+  XAllocColor(display, colormap, &color);
+
+  return color;
+}
 
 int main() {
 
@@ -18,9 +29,13 @@ int main() {
     exit(1);
   }
   screen = DefaultScreen(display);
+  colormap = DefaultColormap(display, 0);
+
+  // Setup Colors
+  color_background = color_from_hex("#1B1D1E");
 
   // Create window
-  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, 800, 200, 0, None, WhitePixel(display, screen));
+  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, 800, 200, 0, None, color_background.pixel);
 
   // Set window type to DOCK
   Atom type = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
@@ -32,6 +47,7 @@ int main() {
 
   // Show the window
   XMapWindow(display, window);
+  XFlush(display);
 
   // Event loop
   XEvent event;
