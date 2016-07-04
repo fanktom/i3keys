@@ -4,6 +4,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/keysym.h>
 
 Display *display;
 Window window;
@@ -32,15 +33,50 @@ static void expose(XEvent *event) {
   XFillRectangle(display, window, DefaultGC(display, screen), 20, 20, 100, 100);
 }
 
+// Send a key event where the type is KeyPress or KeyRelease, keycodes are defined in X11/keysym, e.g. XK_g
+// and the keymask defines the modifier states, e.g. ShiftMask or LockMask or ControlMask
+static void send_key(int type, int keycode, int keymask) {
+
+  // Select target window from current focus
+  Window focus;
+  int revert;
+  XGetInputFocus(display, &focus, &revert);
+
+  // Create key event
+  XKeyEvent event;
+  event.display     = display;
+  event.window      = focus;
+  event.root        = window;
+  event.subwindow   = None;
+  event.time        = CurrentTime;
+  event.x           = 1;
+  event.y           = 1;
+  event.x_root      = 1;
+  event.y_root      = 1;
+  event.same_screen = True;
+  event.keycode     = XKeysymToKeycode(display, keycode);
+  event.state       = keymask;
+  event.type        = type;
+
+  // Send event
+  long event_mask = type == KeyPress ? KeyPressMask : KeyReleaseMask;
+  XSendEvent(event.display, event.window, True, event_mask, (XEvent *)&event);
+}
+
 // button press is called on touch or click down
 static void button_press(XButtonEvent *event) {
   printf("Mouse down in %d, %d\n", event->x, event->y);
+
+  send_key(KeyPress, XK_g, None);
 }
 
 // button release is called on touch up or release
 static void button_release(XButtonEvent *event) {
   printf("Mouse up in %d, %d\n", event->x, event->y);
+  
+  send_key(KeyRelease, XK_g, None);
 }
+
 
 // Main
 int main() {
@@ -92,14 +128,12 @@ int main() {
     
     // Handle mouse button press
     if(event.type == ButtonPress) {
-      printf("Button press\n");
       button_press((XButtonEvent*)&event);
       continue;
     }
     
     // Handle mouse button release
     if(event.type == ButtonRelease) {
-      printf("Button release\n");
       button_release((XButtonEvent*)&event);
       continue;
     }
