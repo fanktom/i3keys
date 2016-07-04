@@ -8,8 +8,12 @@
 Display *display;
 Window window;
 int screen;
+int height = 400;
 Colormap colormap;
 XColor color_background;
+XColor color_foreground;
+XColor color_focused;
+XColor color_text;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -33,9 +37,12 @@ int main() {
 
   // Setup Colors
   color_background = color_from_hex("#1B1D1E");
+  color_foreground = color_from_hex("#303030");
+  color_focused = color_from_hex("#4c7899");
+  color_text = color_from_hex("#ffffff");
 
   // Create window
-  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, 800, 200, 0, None, color_background.pixel);
+  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, DisplayWidth(display, screen), height, 0, None, color_background.pixel);
 
   // Set window type to DOCK
   Atom type = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
