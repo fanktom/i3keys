@@ -7,12 +7,12 @@ typedef struct {
   int y;        // automatic
   int width;    // automatic
   int height;   // automatic
-} i3KeysVisualKey;
+} i3k_key;
 
 #define MARGIN 20
 #define KEYSIZE 80
 
-static i3KeysVisualKey visualLayout[] = {
+static i3k_key keys[] = {
   { .id = 1, .row = 0, .span = 1 },
   { .id = 2, .row = 0, .span = 1 },
   { .id = 3, .row = 0, .span = 1 },

@@ -34,27 +34,30 @@ static void calculate_layout_dimensions() {
   int y = 0;
   int last_row = 0;
 
-  i3KeysVisualKey *visualKey = visualLayout;
-  i3KeysVisualKey *visualKeyEnd = visualLayout + sizeof(visualLayout)/sizeof(visualLayout[0]);
-  while(visualKey < visualKeyEnd) {
-    printf("Calculating key dimensions with id %d\n", visualKey->id);
+  i3k_key *key = keys;
+  i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
+  while(key < keyEnd) {
+    printf("Calculating key dimensions with id %d\n", key->id);
 
-    if(last_row != visualKey->row) {
+    // Calculate starting x
+    if(last_row != key->row) {
       x = 0;
     }
-    last_row = visualKey->row;
+    last_row = key->row;
     x += MARGIN;
 
-    y = MARGIN + visualKey->row * (MARGIN + KEYSIZE);
+    // Calculate starting y
+    y = MARGIN + key->row * (MARGIN + KEYSIZE);
     
-    visualKey->x = x;
-    visualKey->y = y;
-    visualKey->width = visualKey->span * KEYSIZE + (visualKey->span-1) * MARGIN;
-    visualKey->height = KEYSIZE;
+    // Set values to key layout
+    key->x = x;
+    key->y = y;
+    key->width = key->span * KEYSIZE + (key->span-1) * MARGIN;
+    key->height = KEYSIZE;
 
-    x += visualKey->width;
+    x += key->width;
     
-    visualKey++;
+    key++;
   }
 }
 
@@ -63,12 +66,12 @@ static void render_keys() {
   XSetForeground(display, DefaultGC(display, screen), color_unfocused.pixel);
 
   // Draw key backgrounds
-  i3KeysVisualKey *visualKey = visualLayout;
-  i3KeysVisualKey *visualKeyEnd = visualLayout + sizeof(visualLayout)/sizeof(visualLayout[0]);
-  while(visualKey < visualKeyEnd) {
-    printf("Key with id %d\n", visualKey->id);
-    XFillRectangle(display, window, DefaultGC(display, screen), visualKey->x, visualKey->y, visualKey->width, visualKey->height);
-    visualKey++;
+  i3k_key *key = keys;
+  i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
+  while(key < keyEnd) {
+    printf("Key with id %d\n", key->id);
+    XFillRectangle(display, window, DefaultGC(display, screen), key->x, key->y, key->width, key->height);
+    key++;
   }
 }
 
