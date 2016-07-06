@@ -7,22 +7,18 @@ typedef struct {
   int y;        // automatic
   int width;    // automatic
   int height;   // automatic
+  char *text;
+  int keycode;
+  char *shift_text;
+  int shift_keycode;
 } i3k_key;
 
 int key_margin = 20;
 int key_size = 80;
+char *key_font = "-misc-droid sans-medium-r-normal--0-0-0-0-p-0-iso10646-1";
 
 static i3k_key keys[] = {
-  { .id = 1, .row = 0, .size = 1 },
-  { .id = 2, .row = 0, .size = 1 },
-  { .id = 3, .row = 0, .size = 1.5 },
-  { .id = 4, .row = 0, .size = 0.5 },
-  { .id = 5, .row = 0, .size = 1 },
-  { .id = 6, .row = 0, .size = 1 },
-  { .id = 7, .row = 1, .size = 1 },
-  { .id = 8, .row = 1, .size = 1 },
-  { .id = 9, .row = 1, .size = 2 },
-  { .id = 10, .row = 1, .size = 1 },
-  { .id = 11, .row = 1, .size = 1 },
-  { .id = 12, .row = 2, .size = 6 },
+  { .id = 1, .row = 0, .size = 1, .text = "Q", .keycode = XK_Q },
+  { .id = 2, .row = 0, .size = 1, .text = "W", .keycode = XK_W },
+  { .id = 3, .row = 0, .size = 1, .text = "E", .keycode = XK_E },
 };

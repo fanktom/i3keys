@@ -17,12 +17,16 @@ int width;
 int total_keyboard_width;
 int total_keyboard_height;
 // Colors
+GC gc;
 Colormap colormap;
 XColor color_background;
 XColor color_focused;
 XColor color_focused_text;
 XColor color_unfocused;
 XColor color_unfocused_text;
+// Font
+XFontStruct *font;
+int font_height;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -91,16 +95,43 @@ static void calculate_layout_dimensions() {
 
 // Renders each key based on its position and modifier status
 static void render_keys() {
-  // Set foreground color for keys
-  XSetForeground(display, DefaultGC(display, screen), color_unfocused.pixel);
-
-  // Draw key backgrounds
+  // Draw keys
   i3k_key *key = keys;
   i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
   while(key < keyEnd) {
-    XFillRectangle(display, window, DefaultGC(display, screen), key->x, key->y, key->width, key->height);
+    // Draw key background
+    XSetForeground(display, gc, color_unfocused.pixel);
+    XFillRectangle(display, window, gc, key->x, key->y, key->width, key->height);
+
+    // Draw text
+    XSetForeground(display, gc, color_unfocused_text.pixel);
+    char *text = key->text;
+    int text_width = XTextWidth(font, text, strlen(text));
+    int x = key->x + ((key->width - text_width) / 2);
+    int y = key->y + ((key->height + font_height) / 2);
+    XDrawString(display, window, gc, x, y, text, strlen(text));
+    
     key++;
   }
+}
+
+// Try to find key from button event
+static i3k_key* find_key_from_button(XButtonEvent *event) {
+  i3k_key *key = keys;
+  i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
+  while(key < keyEnd) {
+    if(
+       event->x >= key->x &&
+       event->x <= (key->x + key->width) &&
+       event->y >= key->y &&
+       event->y <= (key->y + key->height)
+    ){
+      return key;
+    }
+    
+    key++;
+  }
+  return NULL;
 }
 
 // Expose is called to draw and redraw
@@ -141,16 +172,26 @@ static void send_key(int type, int keycode, int keymask) {
 
 // button press is called on touch or click down
 static void button_press(XButtonEvent *event) {
-  printf("Mouse down in %d, %d\n", event->x, event->y);
+  i3k_key *key = find_key_from_button(event);
+  if(key == NULL) {
+    return;
+  }
 
-  send_key(KeyPress, XK_g, None);
+  printf("Key %s\n", key->text);
+
+  send_key(KeyPress, key->keycode, None);
 }
 
 // button release is called on touch up or release
 static void button_release(XButtonEvent *event) {
-  printf("Mouse up in %d, %d\n", event->x, event->y);
+  i3k_key *key = find_key_from_button(event);
+  if(key == NULL) {
+    return;
+  }
+
+  printf("Key %s\n", key->text);
   
-  send_key(KeyRelease, XK_g, None);
+  send_key(KeyRelease, key->keycode, None);
 }
 
 // Clear and redraw full contents
@@ -178,6 +219,18 @@ int main() {
   color_unfocused_text = color_from_hex("#ffffff");
   color_focused = color_from_hex("#4c7899");
   color_focused_text = color_from_hex("#4c7899");
+  
+  // Setup Graphics Context
+  gc = DefaultGC(display, screen);
+
+  // Setup Font
+  font = XLoadQueryFont(display, key_font);
+  if (font == NULL) {
+    fprintf(stderr, "Cannot load font %s\n", key_font);
+    exit(1);
+  }
+  XSetFont(display, gc, font->fid);
+  font_height = font->ascent + font->descent;
 
   // Width is the full window width
   width = DisplayWidth(display, screen);
