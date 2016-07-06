@@ -11,10 +11,12 @@
 Display *display;
 Window window;
 int screen;
-int height = 400;
+// Dimensions
+int height;
 int width;
 int total_keyboard_width;
 int total_keyboard_height;
+// Colors
 Colormap colormap;
 XColor color_background;
 XColor color_focused;
@@ -31,6 +33,8 @@ static XColor color_from_hex(const char *code) {
   return color;
 }
 
+// Calculate the pixel key width and heights, x and y from the abstract
+// key layout definition. Further centers the keyboard in the middle of the screen
 static void calculate_layout_dimensions() {
   int x = 0;
   int y = 0;
@@ -76,7 +80,7 @@ static void calculate_layout_dimensions() {
   // Calculate offset from left to center keyboard
   keyboard_offset_from_left = (width -total_keyboard_width) / 2;
   
-  // Apply offset to center
+  // Apply offset to center the keyboard
   key = keys;
   while(key < keyEnd) {
     key->x = key->x + keyboard_offset_from_left;
@@ -85,6 +89,7 @@ static void calculate_layout_dimensions() {
 
 }
 
+// Renders each key based on its position and modifier status
 static void render_keys() {
   // Set foreground color for keys
   XSetForeground(display, DefaultGC(display, screen), color_unfocused.pixel);
