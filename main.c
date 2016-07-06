@@ -106,6 +106,7 @@ static void render_keys() {
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
   render_keys();
+  printf("Expose\n");
 }
 
 // Send a key event where the type is KeyPress or KeyRelease, keycodes are defined in X11/keysym, e.g. XK_g
@@ -150,6 +151,12 @@ static void button_release(XButtonEvent *event) {
   printf("Mouse up in %d, %d\n", event->x, event->y);
   
   send_key(KeyRelease, XK_g, None);
+}
+
+// Clear and redraw full contents
+static void reexpose(){
+  XClearWindow(display, window);
+  expose(NULL);
 }
 
 
