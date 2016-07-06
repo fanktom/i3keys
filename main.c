@@ -13,6 +13,8 @@ Window window;
 int screen;
 int height = 400;
 int width;
+int total_keyboard_width;
+int total_keyboard_height;
 Colormap colormap;
 XColor color_background;
 XColor color_focused;
@@ -32,33 +34,55 @@ static XColor color_from_hex(const char *code) {
 static void calculate_layout_dimensions() {
   int x = 0;
   int y = 0;
-  int last_row = 0;
+  int last_row = -1;
+  int max_rows = 0;
+  int keyboard_offset_from_left = 0;
 
   i3k_key *key = keys;
   i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
   while(key < keyEnd) {
-    printf("Calculating key dimensions with id %d\n", key->id);
 
     // Calculate starting x
     if(last_row != key->row) {
       x = 0;
+      max_rows++;
     }
     last_row = key->row;
-    x += MARGIN;
+    x += key_margin;
 
     // Calculate starting y
-    y = MARGIN + key->row * (MARGIN + KEYSIZE);
+    y = key_margin + key->row * (key_margin + key_size);
     
     // Set values to key layout
     key->x = x;
     key->y = y;
-    key->width = key->span * KEYSIZE + (key->span-1) * MARGIN;
-    key->height = KEYSIZE;
+    key->width = key->size * key_size + (key->size-1) * key_margin;
+    key->height = key_size;
 
+    // Set next X starting point
     x += key->width;
+
+    // Track maximum total keyboard width for positioning it in the middle
+    if(x > total_keyboard_width) {
+      total_keyboard_width = x;
+    }
     
     key++;
   }
+
+  // Total keyboard height based on rows
+  total_keyboard_height = max_rows * (key_margin + key_size) + key_margin;
+
+  // Calculate offset from left to center keyboard
+  keyboard_offset_from_left = (width -total_keyboard_width) / 2;
+  
+  // Apply offset to center
+  key = keys;
+  while(key < keyEnd) {
+    key->x = key->x + keyboard_offset_from_left;
+    key++;
+  }
+
 }
 
 static void render_keys() {
@@ -69,7 +93,6 @@ static void render_keys() {
   i3k_key *key = keys;
   i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
   while(key < keyEnd) {
-    printf("Key with id %d\n", key->id);
     XFillRectangle(display, window, DefaultGC(display, screen), key->x, key->y, key->width, key->height);
     key++;
   }
@@ -77,7 +100,6 @@ static void render_keys() {
 
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
-  calculate_layout_dimensions();
   render_keys();
 }
 
@@ -148,8 +170,11 @@ int main() {
   // Width is the full window width
   width = DisplayWidth(display, screen);
 
+  // Calculate keyboard dimensions and layout
+  calculate_layout_dimensions();
+
   // Create window
-  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, width, height, 0, None, color_background.pixel);
+  window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, width, total_keyboard_height, 0, None, color_background.pixel);
 
   // Set window type to DOCK
   Atom type = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
