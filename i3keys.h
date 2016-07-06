@@ -11,6 +11,7 @@ typedef struct {
   int keycode;
   char *shift_text;
   int shift_keycode;
+  int is_pressed;
 } i3k_key;
 
 int key_margin = 20;

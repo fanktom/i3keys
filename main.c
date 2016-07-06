@@ -99,12 +99,15 @@ static void render_keys() {
   i3k_key *key = keys;
   i3k_key *keyEnd = keys + sizeof(keys)/sizeof(keys[0]);
   while(key < keyEnd) {
+
     // Draw key background
-    XSetForeground(display, gc, color_unfocused.pixel);
+    XColor key_color = key->is_pressed ? color_focused : color_unfocused;
+    XSetForeground(display, gc, key_color.pixel);
     XFillRectangle(display, window, gc, key->x, key->y, key->width, key->height);
 
     // Draw text
-    XSetForeground(display, gc, color_unfocused_text.pixel);
+    XColor font_color = key->is_pressed ? color_focused_text : color_unfocused_text;
+    XSetForeground(display, gc, font_color.pixel);
     char *text = key->text;
     int text_width = XTextWidth(font, text, strlen(text));
     int x = key->x + ((key->width - text_width) / 2);
@@ -137,7 +140,6 @@ static i3k_key* find_key_from_button(XButtonEvent *event) {
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
   render_keys();
-  printf("Expose\n");
 }
 
 // Send a key event where the type is KeyPress or KeyRelease, keycodes are defined in X11/keysym, e.g. XK_g
@@ -170,6 +172,12 @@ static void send_key(int type, int keycode, int keymask) {
   XSendEvent(event.display, event.window, True, event_mask, (XEvent *)&event);
 }
 
+// Clear and redraw full contents
+static void reexpose(){
+  XClearWindow(display, window);
+  expose(NULL);
+}
+
 // button press is called on touch or click down
 static void button_press(XButtonEvent *event) {
   i3k_key *key = find_key_from_button(event);
@@ -177,9 +185,14 @@ static void button_press(XButtonEvent *event) {
     return;
   }
 
-  printf("Key %s\n", key->text);
+  // Press key
+  key->is_pressed = True;
 
+  // Send press to XServer
   send_key(KeyPress, key->keycode, None);
+
+  // Rerender
+  reexpose();
 }
 
 // button release is called on touch up or release
@@ -189,17 +202,15 @@ static void button_release(XButtonEvent *event) {
     return;
   }
 
-  printf("Key %s\n", key->text);
+  // Release key
+  key->is_pressed = False;
   
+  // Send release to XServer
   send_key(KeyRelease, key->keycode, None);
-}
 
-// Clear and redraw full contents
-static void reexpose(){
-  XClearWindow(display, window);
-  expose(NULL);
+  // Rerender
+  reexpose();
 }
-
 
 // Main
 int main() {
@@ -217,8 +228,8 @@ int main() {
   color_background = color_from_hex("#1B1D1E");
   color_unfocused = color_from_hex("#303030");
   color_unfocused_text = color_from_hex("#ffffff");
-  color_focused = color_from_hex("#4c7899");
-  color_focused_text = color_from_hex("#4c7899");
+  color_focused = color_from_hex("#00B7FF");
+  color_focused_text = color_from_hex("#ffffff");
   
   // Setup Graphics Context
   gc = DefaultGC(display, screen);
