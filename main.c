@@ -4,7 +4,6 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-#include <X11/keysym.h>
 
 #include "i3keys.h"
 
@@ -82,7 +81,7 @@ static void calculate_layout_dimensions() {
   total_keyboard_height = max_rows * (key_margin + key_size) + key_margin;
 
   // Calculate offset from left to center keyboard
-  keyboard_offset_from_left = (width -total_keyboard_width) / 2;
+  keyboard_offset_from_left = (width - (total_keyboard_width + key_margin)) / 2;
   
   // Apply offset to center the keyboard
   key = keys;
