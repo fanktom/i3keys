@@ -32,8 +32,9 @@ XFontStruct *font;
 int font_height;
 
 // State
-int modifier = None;
 i3k_key *last_key;
+i3k_key *modifier_key;
+int modifier;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -144,6 +145,21 @@ static i3k_key* find_key_from_button(XButtonEvent *event) {
   return NULL;
 }
 
+// Check if key is a modifier
+static int keycode_is_modifier(int keycode) {
+  return 
+    keycode == XK_Shift_L ||
+    keycode == XK_Shift_R ||
+		keycode == XK_Control_L ||
+		keycode == XK_Control_R ||
+		keycode == XK_Super_L ||
+		keycode == XK_Super_R ||
+		keycode == XK_Alt_L ||
+		keycode == XK_Alt_R ||
+		keycode == XK_Meta_L ||
+		keycode == XK_Meta_R;
+}
+
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
   render_keys();
@@ -199,8 +215,9 @@ static void button_press(XButtonEvent *event) {
   last_key = key;
 
   // Set toggles on modifiers
-  if(key->keycode == XK_Shift_L) {
-    modifier = ShiftMask;
+  if(keycode_is_modifier(key->keycode)) {
+    modifier = key->keycode;
+    modifier_key = key;
   }
 
   // Rerender
@@ -213,12 +230,20 @@ static void button_release(XButtonEvent *event) {
   if(last_key == NULL) {
     return;
   }
-
-  // Release key
-  key->is_pressed = False;
-
-  // Unset Modifier
-  modifier = None;
+  
+	// Toggle modifiers
+	if(keycode_is_modifier(key->keycode)) {
+  } else {
+    // Release key
+    key->is_pressed = False;
+		if(modifier_key) {
+      modifier_key->is_pressed = False;
+		}
+	
+    // Unset Modifier
+    modifier_key = NULL;
+		printf("unset modifier");
+	}
   
   // Send release to XServer
   send_key(KeyRelease, key->keycode, modifier);

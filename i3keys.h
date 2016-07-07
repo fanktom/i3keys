@@ -9,10 +9,10 @@ typedef struct {
   int width;    // automatic
   int height;   // automatic
   char *text;
-  int keycode;
   char *shift_text;
-  int shift_keycode;
+  int keycode;
   int is_pressed;
+	int modifier_mask;
 } i3k_key;
 
 int key_margin = 20;
