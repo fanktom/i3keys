@@ -33,8 +33,7 @@ int font_height;
 
 // State
 i3k_key *last_key;
-i3k_key *modifier_key;
-int modifier;
+int modifier_mask;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -145,20 +144,6 @@ static i3k_key* find_key_from_button(XButtonEvent *event) {
   return NULL;
 }
 
-// Check if key is a modifier
-static int keycode_is_modifier(int keycode) {
-  return 
-    keycode == XK_Shift_L ||
-    keycode == XK_Shift_R ||
-		keycode == XK_Control_L ||
-		keycode == XK_Control_R ||
-		keycode == XK_Super_L ||
-		keycode == XK_Super_R ||
-		keycode == XK_Alt_L ||
-		keycode == XK_Alt_R ||
-		keycode == XK_Meta_L ||
-		keycode == XK_Meta_R;
-}
 
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
@@ -207,17 +192,28 @@ static void button_press(XButtonEvent *event) {
     return;
   }
 
-  // Press key
-  key->is_pressed = True;
+  // Handle modifier key press
+  if(key->modifier_mask){
 
-  // Send press to XServer
-  send_key(KeyPress, key->keycode, modifier);
-  last_key = key;
+    // Select
+    if(modifier_mask == None) {
+      key->is_pressed = True;
+      modifier_mask = key->modifier_mask;
+    // Unselect
+    } else {
+      // Unselect pressed modifier
+      key->is_pressed = False;
+      modifier_mask = None;
+    }
 
-  // Set toggles on modifiers
-  if(keycode_is_modifier(key->keycode)) {
-    modifier = key->keycode;
-    modifier_key = key;
+  // Handle normal key press
+  } else {
+    // Highlight key
+    key->is_pressed = True;
+    
+    // Send press to XServer
+    send_key(KeyPress, key->keycode, modifier_mask);
+    last_key = key;
   }
 
   // Rerender
@@ -231,22 +227,11 @@ static void button_release(XButtonEvent *event) {
     return;
   }
   
-	// Toggle modifiers
-	if(keycode_is_modifier(key->keycode)) {
-  } else {
-    // Release key
-    key->is_pressed = False;
-		if(modifier_key) {
-      modifier_key->is_pressed = False;
-		}
-	
-    // Unset Modifier
-    modifier_key = NULL;
-		printf("unset modifier");
-	}
+  // Unhighlight key
+  key->is_pressed = False;
   
   // Send release to XServer
-  send_key(KeyRelease, key->keycode, modifier);
+  send_key(KeyRelease, key->keycode, modifier_mask);
   last_key = NULL;
 
   // Rerender

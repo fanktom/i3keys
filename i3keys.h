@@ -12,7 +12,7 @@ typedef struct {
   char *shift_text;
   int keycode;
   int is_pressed;
-	int modifier_mask;
+  int modifier_mask;
 } i3k_key;
 
 int key_margin = 20;
@@ -51,7 +51,7 @@ static i3k_key keys[] = {
   { .row = 1, .size = 1,   .text = "]",     .keycode = XK_bracketright },
   { .row = 1, .size = 2,   .text = "Return", .keycode = XK_Return },
   
-  { .row = 2, .size = 1.8, .text = "Shift Lock", .keycode = XK_Shift_Lock },
+  { .row = 2, .size = 1.8, .text = "Shift Lock", .keycode = XK_Shift_Lock, .modifier_mask = ShiftMask },
   { .row = 2, .size = 1, .text = "A", .keycode = XK_a },
   { .row = 2, .size = 1, .text = "S", .keycode = XK_s },
   { .row = 2, .size = 1, .text = "D", .keycode = XK_d },
@@ -66,7 +66,7 @@ static i3k_key keys[] = {
   { .row = 2, .size = 1, .text = "\\", .keycode = XK_backslash },
   { .row = 2, .size = 1.7, .text = "Return", .keycode = XK_Return },
   
-  { .row = 3, .size = 1.5, .text = "Shift", .keycode = XK_Shift_L },
+  { .row = 3, .size = 1.5, .text = "Shift", .keycode = XK_Shift_L, .modifier_mask = ShiftMask },
   { .row = 3, .size = 1, .text = "<", .keycode = XK_less },
   { .row = 3, .size = 1, .text = "Z", .keycode = XK_z },
   { .row = 3, .size = 1, .text = "X", .keycode = XK_x },
@@ -79,14 +79,14 @@ static i3k_key keys[] = {
   { .row = 3, .size = 1, .text = ".", .keycode = XK_period },
   { .row = 3, .size = 1, .text = "/", .keycode = XK_slash },
   { .row = 3, .size = 1, .text = "Up", .keycode = XK_Up },
-  { .row = 3, .size = 2, .text = "Shift", .keycode = XK_Shift_R },
+  { .row = 3, .size = 2, .text = "Shift", .keycode = XK_Shift_R, .modifier_mask = ShiftMask },
   
-  { .row = 4, .size = 1.5, .text = "Ctrl", .keycode = XK_Control_L },
-  { .row = 4, .size = 1.5, .text = "Super", .keycode = XK_Super_L },
-  { .row = 4, .size = 1.5, .text = "Alt", .keycode = XK_Alt_L },
+  { .row = 4, .size = 1.5, .text = "Ctrl", .keycode = XK_Control_L, .modifier_mask = ControlMask },
+  { .row = 4, .size = 1.5, .text = "Super", .keycode = XK_Super_L, .modifier_mask = Mod4Mask },
+  { .row = 4, .size = 1.5, .text = "Alt", .keycode = XK_Alt_L, .modifier_mask = Mod1Mask },
   { .row = 4, .size = 7, .text = "Space", .keycode = XK_space },
   { .row = 4, .size = 1, .text = "Left", .keycode = XK_Left },
   { .row = 4, .size = 1, .text = "Down", .keycode = XK_Down },
   { .row = 4, .size = 1, .text = "Right", .keycode = XK_Right },
-  { .row = 4, .size = 1, .text = "Meta", .keycode = XK_Meta_R },
+  { .row = 4, .size = 1, .text = "Alt", .keycode = XK_Alt_R, .modifier_mask = Mod1Mask },
 };
