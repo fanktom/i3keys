@@ -115,7 +115,7 @@ static void render_keys() {
     // Draw text
     XColor font_color = key->is_pressed ? color_focused_text : color_unfocused_text;
     XSetForeground(display, gc, font_color.pixel);
-    char *text = key->text;
+    char *text = modifier_mask == ShiftMask ? key->shift_text : key->text;
     int text_width = XTextWidth(font, text, strlen(text));
     int x = key->x + ((key->width - text_width) / 2);
     int y = key->y + ((key->height + font_height) / 2);
