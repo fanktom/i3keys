@@ -277,11 +277,23 @@ int main() {
 
   // Create window
   window = XCreateSimpleWindow(display, RootWindow(display, screen), 0, 0, width, total_keyboard_height, 0, None, color_background.pixel);
+  
+  // Set window name
+  Atom type = XInternAtom(display, "_NET_WM_NAME", False);
+  Atom value = XInternAtom(display, "i3keys", False);
+  XChangeProperty(display, window, type, XA_ATOM, 32, PropModeReplace, (unsigned char *)&value, 1);
 
   // Set window type to DOCK
-  Atom type = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
-  Atom value = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", False);
+  type = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
+  value = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", False);
   XChangeProperty(display, window, type, XA_ATOM, 32, PropModeReplace, (unsigned char *)&value, 1);
+    
+  // Position at bottom of window
+  unsigned long strut[12];
+  memset(&strut, 0, sizeof(strut));
+  strut[3] = total_keyboard_height; // bottom
+  type = XInternAtom(display, "_NET_WM_STRUT_PARTIAL", False);
+  XChangeProperty(display, window, type, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)strut, 12);
 
   // Select kind of events we want to receive
   XSelectInput(display, window, ExposureMask | ButtonPressMask | ButtonReleaseMask);
