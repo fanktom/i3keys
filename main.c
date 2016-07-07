@@ -7,14 +7,17 @@
 
 #include "i3keys.h"
 
+// X11
 Display *display;
 Window window;
 int screen;
+
 // Dimensions
 int height;
 int width;
 int total_keyboard_width;
 int total_keyboard_height;
+
 // Colors
 GC gc;
 Colormap colormap;
@@ -23,9 +26,14 @@ XColor color_focused;
 XColor color_focused_text;
 XColor color_unfocused;
 XColor color_unfocused_text;
+
 // Font
 XFontStruct *font;
 int font_height;
+
+// State
+int modifier = None;
+i3k_key *last_key;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -165,8 +173,7 @@ static void send_key(int type, int keycode, int keymask) {
   event.keycode     = XKeysymToKeycode(display, keycode);
   event.state       = keymask;
   event.type        = type;
-
-  // Send event
+// Send event
   long event_mask = type == KeyPress ? KeyPressMask : KeyReleaseMask;
   XSendEvent(event.display, event.window, True, event_mask, (XEvent *)&event);
 }
@@ -188,7 +195,13 @@ static void button_press(XButtonEvent *event) {
   key->is_pressed = True;
 
   // Send press to XServer
-  send_key(KeyPress, key->keycode, None);
+  send_key(KeyPress, key->keycode, modifier);
+  last_key = key;
+
+  // Set toggles on modifiers
+  if(key->keycode == XK_Shift_L) {
+    modifier = ShiftMask;
+  }
 
   // Rerender
   reexpose();
@@ -196,16 +209,20 @@ static void button_press(XButtonEvent *event) {
 
 // button release is called on touch up or release
 static void button_release(XButtonEvent *event) {
-  i3k_key *key = find_key_from_button(event);
-  if(key == NULL) {
+  i3k_key *key = last_key;
+  if(last_key == NULL) {
     return;
   }
 
   // Release key
   key->is_pressed = False;
+
+  // Unset Modifier
+  modifier = None;
   
   // Send release to XServer
-  send_key(KeyRelease, key->keycode, None);
+  send_key(KeyRelease, key->keycode, modifier);
+  last_key = NULL;
 
   // Rerender
   reexpose();
