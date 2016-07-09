@@ -33,6 +33,7 @@ int font_height;
 
 // State
 i3k_key *last_key;
+i3k_key *modifier_key;
 int modifier_mask;
 
 // Create an XColor from a hex code such as #1B1D1E
@@ -189,26 +190,34 @@ static void button_press(XButtonEvent *event) {
 
   // Handle modifier key press
   if(key->modifier_mask){
+    
+    // Deselect potential last modifier key
+    if(modifier_key != NULL && modifier_key != key){
+      modifier_key->is_pressed = False;
+      modifier_mask = None;
+      modifier_key = NULL;
+    }
 
     // Select
     if(modifier_mask == None) {
       key->is_pressed = True;
       modifier_mask = key->modifier_mask;
-    // Unselect
+      modifier_key = key;
     } else {
       // Unselect pressed modifier
       key->is_pressed = False;
       modifier_mask = None;
+      modifier_key = NULL;
     }
 
   // Handle normal key press
   } else {
     // Highlight key
     key->is_pressed = True;
+    last_key = key;
     
     // Send press to XServer
     send_key(KeyPress, key->keycode, modifier_mask);
-    last_key = key;
   }
 
   // Rerender
