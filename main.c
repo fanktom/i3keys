@@ -147,6 +147,7 @@ static i3k_key* find_key_from_button(XButtonEvent *event) {
 
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
+  calculate_layout_dimensions();
   render_keys();
 }
 
@@ -177,12 +178,6 @@ static void send_key(int type, int keycode, int keymask) {
 // Send event
   long event_mask = type == KeyPress ? KeyPressMask : KeyReleaseMask;
   XSendEvent(event.display, event.window, True, event_mask, (XEvent *)&event);
-}
-
-// Clear and redraw full contents
-static void reexpose(){
-  XClearWindow(display, window);
-  expose(NULL);
 }
 
 // button press is called on touch or click down
@@ -217,7 +212,7 @@ static void button_press(XButtonEvent *event) {
   }
 
   // Rerender
-  reexpose();
+  render_keys();
 }
 
 // button release is called on touch up or release
@@ -235,7 +230,7 @@ static void button_release(XButtonEvent *event) {
   last_key = NULL;
 
   // Rerender
-  reexpose();
+  render_keys();
 }
 
 // Main
