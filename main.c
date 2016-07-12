@@ -241,6 +241,10 @@ static void button_press(XButtonEvent *event) {
 
     // Send press to XServer
     send_key(KeyPress, key->keycode, modifier_mask);
+
+    // Reset modifier
+    modifier_key->is_pressed = False;
+    modifier_mask = None;
   }
 
   // Rerender
