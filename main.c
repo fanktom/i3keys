@@ -31,10 +31,14 @@ XColor color_unfocused_text;
 XFontStruct *font;
 int font_height;
 
+// Switch
+int switch_height = 30;
+
 // State
 i3k_key *last_key;
 i3k_key *modifier_key;
 int modifier_mask;
+int open = 1;
 
 // Create an XColor from a hex code such as #1B1D1E
 static XColor color_from_hex(const char *code) {
@@ -67,7 +71,7 @@ static void calculate_layout_dimensions() {
     x += key_margin;
 
     // Calculate starting y
-    y = key_margin + key->row * (key_margin + key_size);
+    y = switch_height + key_margin + key->row * (key_margin + key_size);
 
     // Set values to key layout
     key->x = x;
@@ -87,7 +91,7 @@ static void calculate_layout_dimensions() {
   }
 
   // Total keyboard height based on rows
-  total_keyboard_height = max_rows * (key_margin + key_size) + key_margin;
+  total_keyboard_height = max_rows * (key_margin + key_size) + key_margin + switch_height;
 
   // Calculate offset from left to center keyboard
   keyboard_offset_from_left = (width - (total_keyboard_width + key_margin)) / 2;
@@ -126,6 +130,12 @@ static void render_keys() {
   }
 }
 
+// Renders the switch to open/close the keyboard
+static void render_switch() {
+    XSetForeground(display, gc, color_focused.pixel);
+    XFillRectangle(display, window, gc, 0, 0, width, switch_height);
+}
+
 // Try to find key from button event
 static i3k_key* find_key_from_button(XButtonEvent *event) {
   i3k_key *key = keys;
@@ -148,6 +158,7 @@ static i3k_key* find_key_from_button(XButtonEvent *event) {
 // Expose is called to draw and redraw
 static void expose(XEvent *event) {
   calculate_layout_dimensions();
+  render_switch();
   render_keys();
 }
 
@@ -182,6 +193,19 @@ static void send_key(int type, int keycode, int keymask) {
 
 // Button press is called on touch or click down
 static void button_press(XButtonEvent *event) {
+  // Switch
+  if(event->y <= switch_height) {
+    if(open == 1) {
+      open = 0;
+      XMoveResizeWindow(display, window, 0, 0, width, switch_height);
+    } else {
+      open = 1;
+      XMoveResizeWindow(display, window, 0, 0, width, total_keyboard_height);
+    }
+    return;
+  }
+
+  // Key
   i3k_key *key = find_key_from_button(event);
   if(key == NULL) {
     return;
