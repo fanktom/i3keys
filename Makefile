@@ -1,4 +1,4 @@
-CFLAGS=-I. -Wall
+CFLAGS=-I. -Wall -g
 DEPS = i3keys.h
 OBJS = main.o
 LIBS=-lX11

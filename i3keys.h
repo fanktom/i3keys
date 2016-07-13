@@ -49,7 +49,7 @@ static i3k_key keys[] = {
   { .row = 1, .size = 1,   .text = "p",     .shift_text = "P", .keycode = XK_p },
   { .row = 1, .size = 1,   .text = "[",     .shift_text = "{", .keycode = XK_bracketleft },
   { .row = 1, .size = 1,   .text = "]",     .shift_text = "}", .keycode = XK_bracketright },
-  { .row = 1, .size = 2,   .text = "Return", .shift_text = "Return", .keycode = XK_Return },
+  { .row = 1, .size = 2,   .text = "Close", .shift_text = "Close", .keycode = XK_Return },
   
   { .row = 2, .size = 1.8, .text = "Shift Lock", .shift_text = "Shift Lock", .keycode = XK_Shift_Lock, .modifier_mask = ShiftMask },
   { .row = 2, .size = 1, .text = "a", .shift_text = "A", .keycode = XK_a },
@@ -78,15 +78,16 @@ static i3k_key keys[] = {
   { .row = 3, .size = 1, .text = ",", .shift_text = "<", .keycode = XK_comma },
   { .row = 3, .size = 1, .text = ".", .shift_text = ">", .keycode = XK_period },
   { .row = 3, .size = 1, .text = "/", .shift_text = "?", .keycode = XK_slash },
+  { .row = 3, .size = 1, .text = "XX", .shift_text = "XX", .keycode = XK_Shift_R, .modifier_mask = ShiftMask },
   { .row = 3, .size = 1, .text = "Up", .shift_text = "Up", .keycode = XK_Up },
-  { .row = 3, .size = 2, .text = "Shift", .shift_text = "Shift", .keycode = XK_Shift_R, .modifier_mask = ShiftMask },
+  { .row = 3, .size = 1, .text = "Shift", .shift_text = "Shift", .keycode = XK_Shift_R, .modifier_mask = ShiftMask },
   
   { .row = 4, .size = 1.5, .text = "Ctrl", .shift_text = "Ctrl", .keycode = XK_Control_L, .modifier_mask = ControlMask },
   { .row = 4, .size = 1.5, .text = "Super", .shift_text = "Super", .keycode = XK_Super_L, .modifier_mask = Mod4Mask },
   { .row = 4, .size = 1.5, .text = "Alt",   .shift_text = "Alt", .keycode = XK_Alt_L, .modifier_mask = Mod1Mask },
   { .row = 4, .size = 7, .text = "Space",   .shift_text = "Space", .keycode = XK_space },
+  { .row = 4, .size = 1, .text = "Alt",     .shift_text = "Alt", .keycode = XK_Alt_R, .modifier_mask = Mod1Mask },
   { .row = 4, .size = 1, .text = "Left",    .shift_text = "Left", .keycode = XK_Left },
   { .row = 4, .size = 1, .text = "Down",    .shift_text = "Down", .keycode = XK_Down },
   { .row = 4, .size = 1, .text = "Right",   .shift_text = "Right", .keycode = XK_Right },
-  { .row = 4, .size = 1, .text = "Alt",     .shift_text = "Alt", .keycode = XK_Alt_R, .modifier_mask = Mod1Mask },
 };
